@@ -1,6 +1,7 @@
 {{ config(
     materialized='incremental',
-    unique_key='property_id'
+    unique_key='property_id',
+    incremental_strategy='merge'
 ) }}
 
 SELECT

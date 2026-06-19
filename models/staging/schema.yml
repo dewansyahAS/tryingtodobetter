@@ -56,3 +56,12 @@ models:
       - name: room_id
         tests:
           - not_null
+
+  - name: dim_date
+
+    columns:
+
+      - name: date_key
+        tests:
+          - unique
+          - not_null

@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: mart
+
+    tables:
+      - name: stg_rooms
+      - name: stg_tenancies
+      - name: stg_properties
+      - name: dim_date
+
+models:
+  - name: fact_occupancy_rate
+    columns:
+      - name: property_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                  to: ref('stg_properties')
+                  field: property_id
+
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                  to: ref('dim_date')
+                  field: date_key
+
+      - name: room_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_rooms')
+                field: room_id
+
+    tests:
+      # kombinasi property_id + date_key harus unik (grain check)
+      - unique:
+          column_name: "CONCAT(room_id, '-', CAST(date_key AS STRING))"
+
