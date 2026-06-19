@@ -13,8 +13,8 @@ all_rooms AS (
         r.property_id,
         r.deleted_at        AS room_deleted_at,
         p.deleted_at        AS property_deleted_at
-    FROM `mart.stg_rooms` r
-    JOIN `mart.stg_properties` p ON p.property_id = r.property_id
+    FROM {{ source('mart','stg_rooms') }} r
+    JOIN {{ source('mart','stg_properties') }} p ON p.property_id = r.property_id
 ),
 
 room_days AS (
@@ -24,7 +24,7 @@ room_days AS (
         d.date_key,
         d.date_day
     FROM all_rooms ar
-    CROSS JOIN `mart.dim_date` d
+    CROSS JOIN {{ source('mart','dim_date') }} d
     WHERE
         (ar.room_deleted_at     IS NULL OR d.date_day < DATE(ar.room_deleted_at))
         AND (ar.property_deleted_at IS NULL OR d.date_day < DATE(ar.property_deleted_at))
@@ -55,8 +55,8 @@ room_occupancy AS (
             t2.room_id,
             t2.tenancy_id,
             d2.date_key AS dim_date_key
-        FROM `mart.stg_tenancies` t2
-        JOIN `mart.dim_date` d2
+        FROM {{ source('mart','stg_tenancies') }} t2
+        JOIN {{ source('mart','dim_date') }}  d2
           ON DATE(t2.check_in_date)  <= d2.date_day
          AND DATE(t2.check_out_date) >  d2.date_day
         WHERE t2.status != 'cancelled'
