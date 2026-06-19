@@ -1,0 +1,49 @@
+version: 2
+
+sources:
+  - name: mart
+    schema: mart
+    tables:
+      - name: stg_rooms
+      - name: stg_properties
+      - name: stg_tenancies
+      - name: dim_date
+
+
+models:
+  - name: fact_occupancy_rate
+    description: "Daily occupancy status per room"
+
+    config:
+      unique_key:
+        - room_id
+        - date_key
+
+    columns:
+      - name: room_id
+        description: "Unique room identifier"
+        tests:
+          - not_null
+
+      - name: property_id
+        description: "Property identifier"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mart','stg_properties')
+                field: property_id
+
+      - name: date_key
+        description: "Date dimension key"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mart','dim_date')
+                field: date_key
+
+      - name: is_occupied
+        description: "1 if room occupied, otherwise 0"
+        tests:
+          - not_null
